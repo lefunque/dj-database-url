@@ -2,20 +2,7 @@
 
 import os
 
-try:
-    import urlparse
-except ImportError:
-    import urllib.parse as urlparse
-
-
-
-# Register database schemes in URLs.
-urlparse.uses_netloc.append('postgres')
-urlparse.uses_netloc.append('postgresql')
-urlparse.uses_netloc.append('postgis')
-urlparse.uses_netloc.append('mysql')
-urlparse.uses_netloc.append('mysql2')
-urlparse.uses_netloc.append('sqlite')
+import furl
 
 DEFAULT_ENV = 'DATABASE_URL'
 
@@ -58,10 +45,10 @@ def parse(url):
     # otherwise parse the url as normal
     config = {}
 
-    url = urlparse.urlparse(url)
+    url = furl.furl(url)
 
     # Remove query strings.
-    path = url.path[1:]
+    path = str(url.path)[1:]
     path = path.split('?', 2)[0]
 
     # if we are using sqlite and we have no path, then assume we
@@ -74,7 +61,7 @@ def parse(url):
         'NAME': path,
         'USER': url.username,
         'PASSWORD': url.password,
-        'HOST': url.hostname,
+        'HOST': url.host,
         'PORT': url.port,
     })
 
