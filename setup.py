@@ -41,7 +41,7 @@ setup(
     version='0.2.2',
     install_requires=[
         'furl',
-    ]
+    ],
     url='https://github.com/kennethreitz/dj-database-url',
     license='BSD',
     author='Kenneth Reitz',
