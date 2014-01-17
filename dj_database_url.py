@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import os
-
 import furl
+
 
 DEFAULT_ENV = 'DATABASE_URL'
 
 SCHEMES = {
     'postgres': 'django.db.backends.postgresql_psycopg2',
     'postgresql': 'django.db.backends.postgresql_psycopg2',
+    'pgsql': 'django.db.backends.postgresql_psycopg2',
     'postgis': 'django.contrib.gis.db.backends.postgis',
     'mysql': 'django.db.backends.mysql',
     'mysql2': 'django.db.backends.mysql',
-    'sqlite': 'django.db.backends.sqlite3'
+    'mysqlgis': 'django.contrib.gis.db.backends.mysql',
+    'spatialite': 'django.contrib.gis.db.backends.spatialite',
+    'sqlite': 'django.db.backends.sqlite3',
 }
 
 
-def config(env=DEFAULT_ENV, default=None):
+def config(env=DEFAULT_ENV, default=None, engine=None):
     """Returns configured DATABASE dictionary from DATABASE_URL."""
 
     config = {}
@@ -24,12 +27,12 @@ def config(env=DEFAULT_ENV, default=None):
     s = os.environ.get(env, default)
 
     if s:
-        config = parse(s)
+        config = parse(s, engine)
 
     return config
 
 
-def parse(url):
+def parse(url, engine=None):
     """Parses a database URL."""
 
     if url == 'sqlite://:memory:':
@@ -58,14 +61,16 @@ def parse(url):
 
     # Update with environment configuration.
     config.update({
-        'NAME': path,
-        'USER': url.username,
-        'PASSWORD': url.password,
-        'HOST': url.host,
-        'PORT': url.port,
+        'NAME': path or '',
+        'USER': url.username or '',
+        'PASSWORD': url.password or '',
+        'HOST': url.host or '',
+        'PORT': url.port or '',
     })
 
-    if url.scheme in SCHEMES:
+    if engine:
+        config['ENGINE'] = engine
+    elif url.scheme in SCHEMES:
         config['ENGINE'] = SCHEMES[url.scheme]
 
     return config
